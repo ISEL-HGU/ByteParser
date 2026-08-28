@@ -844,7 +844,11 @@ public class ByteAnalyzer {
             returnInformation = new SourceFile(attributeNameIndex, attributeLength, sourceFileIndex);
 
         } else if(Arrays.equals(attributeName, "SourceDebugExtension".getBytes("UTF-8"))) {
-            int length = ((attributeLength[0] & 0xFF) << 8) | (attributeLength[1] & 0xFF);
+            int length = ((attributeLength[0] & 0xFF) << 24) |
+              ((attributeLength[1] & 0xFF) << 16) |
+              ((attributeLength[2] & 0xFF) << 8) |
+              (attributeLength[3] & 0xFF);
+            
             byte[] debugExtension = Arrays.copyOfRange(bytes, offset, offset + length);
             offset += length;
 
