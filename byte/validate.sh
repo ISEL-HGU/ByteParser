@@ -1,66 +1,75 @@
 #!/usr/bin/env bash
 
 # ==========================================
-# 실행 모드 설정 (1: 구조 검증만, 2: javap 검증만, all: 둘 다 연속 실행)
-# 사용예시: 
-#   Screen 그룹 A: MODE=1 ./run_validate.sh
-#   Screen 그룹 B: MODE=2 ./run_validate.sh
+# 실행 모드 설정 (MODE 환경변수로 전달)
+# 사용예시:
+#   Screen 그룹 A (구조 검증만)    : MODE=1 ./validate.sh
+#   Screen 그룹 B (Javap 검증만)   : MODE=2 ./validate.sh
+#   Screen 그룹 C (바이너리 비교만): MODE=3 ./validate.sh
+#   Screen 그룹 D (전체 연속 실행) : MODE=all ./validate.sh
 # ==========================================
 MODE="${MODE:-all}"
 
 CLASSLIST_DIR="/data2/minha/data/classlist"
 OUTBASE="/data2/minha/data/output"
 
+# 파이썬 검증 스크립트 정의
 SCRIPT_STRUCT="validate_struct.py"
 SCRIPT_JAVAP="validate_javap.py"
+SCRIPT_BINARY="validate_binary.py"
 
+# 실패 상세 로그 파일
 LOG_STRUCT="failed_struct_log.txt"
 LOG_JAVAP="failed_javap_log.txt"
+LOG_BINARY="failed_binary_log.txt"
 
-# ✅ 검증 모드별 할당 기록 파일
+# 모드별 처리 완료/선점 기록 파일 (Tracker Logs)
 PROCESSED_STRUCT_LOG="processed_lists_struct.txt"
 PROCESSED_JAVAP_LOG="processed_lists_javap.txt"
+PROCESSED_BINARY_LOG="processed_lists_binary.txt"
 
 # 기록 파일이 없으면 생성
-touch "$PROCESSED_STRUCT_LOG" "$PROCESSED_JAVAP_LOG"
+touch "$PROCESSED_STRUCT_LOG" "$PROCESSED_JAVAP_LOG" "$PROCESSED_BINARY_LOG"
 
 echo "=========================================="
-echo " Starting Validation (MODE: $MODE)"
-echo " Struct Tracker Log : $PROCESSED_STRUCT_LOG"
-echo " Javap  Tracker Log : $PROCESSED_JAVAP_LOG"
+echo " Starting Validation Pipeline (MODE: $MODE)"
+echo " MODE 1 (STRUCT) Tracker : $PROCESSED_STRUCT_LOG"
+echo " MODE 2 (JAVAP)  Tracker : $PROCESSED_JAVAP_LOG"
+echo " MODE 3 (BINARY) Tracker : $PROCESSED_BINARY_LOG"
 echo "=========================================="
 
-# 💡 서브셸 문제를 방지하기 위해 Process Substitution (< <(...)) 사용
 while read -r list_file; do
     [ -z "$list_file" ] && continue
 
     name=$(basename "$list_file")
-    # 파일명 앞뒤 공백 제거 및 트림
-    name=$(echo "$name" | xargs)
+    name=$(echo "$name" | xargs) # 파일명 공백 제거
 
     # ----------------------------------------------------
     # 1. 이미 처리된 리스트 파일인지 검사 (Skip)
     # ----------------------------------------------------
     skip_flag=0
 
-    if [[ "$MODE" == "1" || "$MODE" == "all" ]]; then
+    if [[ "$MODE" == "1" ]]; then
         if grep -Fxq "$name" "$PROCESSED_STRUCT_LOG" 2>/dev/null; then
-            echo "⏩ [SKIP LIST (STRUCT)] Already assigned: $name"
-            skip_flag=1
+            echo "⏩ [SKIP LIST (STRUCT)] Already assigned: $name"; skip_flag=1
         fi
-    fi
-
-    if [[ "$MODE" == "2" ]]; then
+    elif [[ "$MODE" == "2" ]]; then
         if grep -Fxq "$name" "$PROCESSED_JAVAP_LOG" 2>/dev/null; then
-            echo "⏩ [SKIP LIST (JAVAP)] Already assigned: $name"
-            skip_flag=1
+            echo "⏩ [SKIP LIST (JAVAP)] Already assigned: $name"; skip_flag=1
+        fi
+    elif [[ "$MODE" == "3" ]]; then
+        if grep -Fxq "$name" "$PROCESSED_BINARY_LOG" 2>/dev/null; then
+            echo "⏩ [SKIP LIST (BINARY)] Already assigned: $name"; skip_flag=1
+        fi
+    elif [[ "$MODE" == "all" ]]; then
+        if grep -Fxq "$name" "$PROCESSED_STRUCT_LOG" 2>/dev/null && \
+           grep -Fxq "$name" "$PROCESSED_JAVAP_LOG" 2>/dev/null && \
+           grep -Fxq "$name" "$PROCESSED_BINARY_LOG" 2>/dev/null; then
+            echo "⏩ [SKIP LIST (ALL)] Fully processed in all modes: $name"; skip_flag=1
         fi
     fi
 
-    # 스킵 대상이면 다음 리스트 파일로 바로 이동
-    if [ $skip_flag -eq 1 ]; then
-        continue
-    fi
+    [ $skip_flag -eq 1 ] && continue
 
     # ----------------------------------------------------
     # 2. 선점 기록 작성 (Locking)
@@ -68,9 +77,11 @@ while read -r list_file; do
     if [[ "$MODE" == "1" || "$MODE" == "all" ]]; then
         echo "$name" >> "$PROCESSED_STRUCT_LOG"
     fi
-
     if [[ "$MODE" == "2" || "$MODE" == "all" ]]; then
-        echo "$name" >> "$PROCESSED_LIST_LOG" 2>/dev/null || echo "$name" >> "$PROCESSED_JAVAP_LOG"
+        echo "$name" >> "$PROCESSED_JAVAP_LOG"
+    fi
+    if [[ "$MODE" == "3" || "$MODE" == "all" ]]; then
+        echo "$name" >> "$PROCESSED_BINARY_LOG"
     fi
 
     echo -e "\n=========================================="
@@ -107,7 +118,7 @@ while read -r list_file; do
 
         echo -n "Checking [$name]: $json_filename ... "
 
-        # 파일 존재 체크
+        # JSON 존재 여부 체크
         if [ ! -f "$json_path" ]; then
             echo "❌ [JSON File Missing]"
             echo "[Missing JSON] List: $name | Path: $json_path" >> "$LOG_STRUCT"
@@ -116,12 +127,12 @@ while read -r list_file; do
 
         tmp_output=$(mktemp)
 
-        # [STEP 1] 구조 검증 (validate_struct.py)
+        # ----------------------------------------------------
+        # [MODE 1 / ALL] STEP 1: 구조 검증 (validate_struct.py)
+        # ----------------------------------------------------
         if [[ "$MODE" == "1" || "$MODE" == "all" ]]; then
             python3 "$SCRIPT_STRUCT" "$json_path" > "$tmp_output" 2>&1
-            struct_code=$?
-
-            if [ $struct_code -eq 0 ]; then
+            if [ $? -eq 0 ]; then
                 echo -n "[STRUCT: ✅] "
             else
                 echo "❌ [STRUCT FAILED]"
@@ -135,29 +146,51 @@ while read -r list_file; do
                     echo "=========================================="
                     echo ""
                 } >> "$LOG_STRUCT"
-                
                 rm -f "$tmp_output"
                 continue
             fi
         fi
 
-        # [STEP 2] Javap & 바이트 검증 (validate_javap.py)
+        # ----------------------------------------------------
+        # [MODE 2 / ALL] STEP 2: Javap 파싱 검증 (validate_javap.py)
+        # ----------------------------------------------------
         if [[ "$MODE" == "2" || "$MODE" == "all" ]]; then
+            python3 "$SCRIPT_JAVAP" "$json_path" > "$tmp_output" 2>&1
+            if [ $? -eq 0 ]; then
+                echo -n "[JAVAP: ✅] "
+            else
+                echo "❌ [JAVAP FAILED]"
+                {
+                    echo "=========================================="
+                    echo "Timestamp : $(date)"
+                    echo "List Name : $name"
+                    echo "JSON Path : $json_path"
+                    echo "---------------- Output ------------------"
+                    cat "$tmp_output"
+                    echo "=========================================="
+                    echo ""
+                } >> "$LOG_JAVAP"
+                rm -f "$tmp_output"
+                continue
+            fi
+        fi
+
+        # ----------------------------------------------------
+        # [MODE 3 / ALL] STEP 3: 원본 바이너리 1:1 비교 (validate_binary.py)
+        # ----------------------------------------------------
+        if [[ "$MODE" == "3" || "$MODE" == "all" ]]; then
             if [ ! -f "$orig_class_path" ]; then
                 echo "❌ [CLASS File Missing]"
-                echo "[Missing Class] List: $name | Path: $orig_class_path" >> "$LOG_JAVAP"
+                echo "[Missing Class] List: $name | Path: $orig_class_path" >> "$LOG_BINARY"
                 rm -f "$tmp_output"
                 continue
             fi
 
-            python3 "$SCRIPT_JAVAP" "$json_path" "$orig_class_path" > "$tmp_output" 2>&1
-            javap_code=$?
-
-            if [ $javap_code -eq 0 ]; then
-                echo "[JAVAP: ✅]"
-                cat "$tmp_output"
+            python3 "$SCRIPT_BINARY" "$json_path" "$orig_class_path" > "$tmp_output" 2>&1
+            if [ $? -eq 0 ]; then
+                echo "[BINARY: ✅]"
             else
-                echo "❌ [JAVAP FAILED]"
+                echo "❌ [BINARY FAILED]"
                 {
                     echo "=========================================="
                     echo "Timestamp : $(date)"
@@ -168,8 +201,10 @@ while read -r list_file; do
                     cat "$tmp_output"
                     echo "=========================================="
                     echo ""
-                } >> "$LOG_JAVAP"
+                } >> "$LOG_BINARY"
             fi
+        else
+            echo "" # 모드 1 또는 2 단독 실행 시 줄바꿈 처리
         fi
 
         rm -f "$tmp_output"
@@ -179,5 +214,5 @@ while read -r list_file; do
 done < <(find "$CLASSLIST_DIR" -maxdepth 1 -type f | sort)
 
 echo -e "\n=========================================="
-echo " Process Finished (MODE: $MODE)."
+echo " Validation Process Finished (MODE: $MODE)."
 echo "=========================================="
