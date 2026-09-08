@@ -1,9 +1,7 @@
 package hgu.isel.structure.attribute.type.module;
 
-import hgu.isel.structure.attribute.type.parameter.Parameter;
+import hgu.isel.structure.BaseBytecodeStructure;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -11,7 +9,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Requires {
+public class Requires extends BaseBytecodeStructure {
     private byte[] requiresIndex; // u2
     private byte[] requiresFlags; // u2
     private byte[] requiresVersionIndex; // u2
@@ -45,51 +43,5 @@ public class Requires {
         this.requiresFlags = requiresFlags;
         this.requiresVersionIndex = requiresVersionIndex;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(byte b : requiresIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : requiresFlags) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : requiresVersionIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        return stringBuilder.toString();
-    }
-
-
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Requires Index]");
-        for(byte b : requiresIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Requires Flag]");
-        for(byte b : requiresFlags) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Requires Version Index]");
-        for(byte b : requiresVersionIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        return output;
-    }
+    
 }

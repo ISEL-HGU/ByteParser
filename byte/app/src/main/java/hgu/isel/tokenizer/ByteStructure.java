@@ -1,10 +1,20 @@
 package hgu.isel.tokenizer;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
 import hgu.isel.structure.constant.ConstantPoolInformation;
+
 import hgu.isel.structure.field.FieldInformation;
 import hgu.isel.structure.interfaces.Interfaces;
 import hgu.isel.structure.method.MethodInformation;
+import java.lang.reflect.Field;
+import java.util.List;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
  * This class represents the entire structure of the input bytecodes.
@@ -12,7 +22,7 @@ import hgu.isel.structure.method.MethodInformation;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class ByteStructure {
+public class ByteStructure extends BaseBytecodeStructure {
     private String fileName;
     private byte[] magic;
     private byte[] minorVersion;
@@ -30,6 +40,47 @@ public class ByteStructure {
     private MethodInformation[] methodInformation;
     private byte[] attributesCount;
     private AttributeInformation[] attributeInformation;
+
+    @Override
+    public JsonElement toJson() {
+        // 부모(BaseBytecodeStructure)의 기본 리플렉션 기반 toJson() 호출
+        JsonObject originalJson = (JsonObject) super.toJson();
+        JsonObject resultJson = new JsonObject();
+
+        // 1. 하위에 ErrorAttribute가 존재하는지 체크하여 최상단에 "error": true 추가
+        if (hasErrorAttribute()) { 
+            resultJson.addProperty("error", true);
+        }
+
+        // 2. 기존 originalJson의 키-값들을 순서대로 복사
+        originalJson.entrySet().forEach(entry -> {
+            resultJson.add(entry.getKey(), entry.getValue());
+        });
+
+        return resultJson;
+    }
+
+    @Override
+    public String toString() {
+        String originalResult = toStringWithIndent(0);
+
+        // ErrorAttribute가 존재하지 않으면 기존 toStringWithIndent 결과 그대로 반환
+        if (!hasErrorAttribute()) {
+            return originalResult;
+        }
+
+        // "ByteStructure {\n" 문구 바로 뒤(첫 번째 개행 다음)에 "  error: true\n" 삽입
+        int firstNewLineIndex = originalResult.indexOf("\n");
+        if (firstNewLineIndex != -1) {
+            return originalResult.substring(0, firstNewLineIndex + 1)
+                    + "  error: true\n"
+                    + originalResult.substring(firstNewLineIndex + 1);
+        }
+
+        // 개행 문자가 없는 예외적인 경우 맨 앞에 붙여서 반환
+        return "error: true\n" + originalResult;
+    }
+
 
     public byte[] getMagic() {
         return magic;
@@ -185,4 +236,5 @@ public class ByteStructure {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
 }

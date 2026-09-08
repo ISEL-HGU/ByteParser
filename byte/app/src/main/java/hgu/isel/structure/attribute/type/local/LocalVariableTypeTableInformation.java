@@ -1,15 +1,13 @@
 package hgu.isel.structure.attribute.type.local;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import hgu.isel.structure.BaseBytecodeStructure;
 /**
  * This class supports the structure of the JVM bytecodes.
  * By overriding the toString(), tokenize() methods, it can analyze / tokenize the bytecodes.
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class LocalVariableTypeTableInformation {
+public class LocalVariableTypeTableInformation extends BaseBytecodeStructure {
     private byte[] startPC; // u2
     private byte[] length; // u2
     private byte[] nameIndex; // u2
@@ -63,75 +61,5 @@ public class LocalVariableTypeTableInformation {
         this.signatureIndex = signatureIndex;
         this.index = index;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(byte b : startPC) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : length) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : nameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : signatureIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : index) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        return stringBuilder.toString();
-    }
-
-
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Local Variable Type Table Information Start PC]");
-        for(byte b : startPC) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Local Variable Type Table Information Length]");
-        for(byte b : length) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Local Variable Type Table Information Name Index]");
-        for(byte b : nameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Local Variable Type Table Information Signature Index]");
-        for(byte b : signatureIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-
-        // output.add("[Local Variable Type Table Information Index]");
-        for(byte b : index) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-
-        return output;
-    }
+    
 }

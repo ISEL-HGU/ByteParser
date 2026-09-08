@@ -1,13 +1,13 @@
 package hgu.isel.structure.attribute.type;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
-import hgu.isel.structure.attribute.type.boot.BootstrapMethodInformation;
 import hgu.isel.structure.attribute.type.code.CodeAttributeAnalyzer;
 import hgu.isel.structure.attribute.type.code.Instruction;
 import hgu.isel.structure.attribute.type.exception.ExceptionTable;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -15,7 +15,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Code implements AttributeInformation {
+public class Code extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] attributeNameIndex; // u2
     private byte[] attributeLength; // u4 563
     private byte[] maxStack; // u2
@@ -125,123 +125,5 @@ public class Code implements AttributeInformation {
 
         this.code = codeAttributeAnalyzer.getInstructions();
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\n        - Code: ");
-
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : maxStack) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : maxLocals) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : codeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(Instruction b : code) {
-            stringBuilder.append(b.toString());
-        }
-
-        for(byte b : exceptionTableLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(ExceptionTable e : exceptionTable) {
-            stringBuilder.append(e.toString());
-        }
-
-        for(byte b : attributesCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(AttributeInformation a : attributes) {
-            stringBuilder.append(a.toString());
-        }
-
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Code Attribute Name Index]");
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Code Attribute Length]");
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Code Attribute Max Stack]");
-        for(byte b : maxStack) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Code Attribute Max Locals]");
-        for(byte b : maxLocals) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Code Attribute Code Length]");
-        for(byte b : codeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(Instruction i : code) {
-            output.addAll(i.tokenize());
-        }
-
-        // output.add("[Code Attribute Exception Table Length]");
-        for(byte b : exceptionTableLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(ExceptionTable i : exceptionTable) {
-            output.addAll(i.tokenize());
-        }
-
-        // output.add("[Code Attribute Count]");
-        for(byte b : attributesCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(AttributeInformation i : attributes) {
-            output.addAll(i.tokenize());
-        }
-
-
-        return output;
-    }
+    
 }

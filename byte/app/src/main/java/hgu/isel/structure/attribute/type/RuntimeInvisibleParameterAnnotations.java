@@ -1,11 +1,8 @@
 package hgu.isel.structure.attribute.type;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
 import hgu.isel.structure.attribute.type.annotation.ParameterAnnotations;
-import hgu.isel.structure.attribute.type.annotation.elemet.union.Annotation;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -13,7 +10,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class RuntimeInvisibleParameterAnnotations implements AttributeInformation {
+public class RuntimeInvisibleParameterAnnotations extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] attributeNameIndex; // u2
     private byte[] attributeLength; // u4
     private byte numberOfParameters;
@@ -58,58 +55,4 @@ public class RuntimeInvisibleParameterAnnotations implements AttributeInformatio
         this.parameterAnnotations = parameterAnnotations;
     }
 
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\n        - RuntimeInvisibleParameterAnnotations: ");
-
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        stringBuilder.append(String.format("%02X", numberOfParameters));
-
-        for(ParameterAnnotations p : parameterAnnotations) {
-            stringBuilder.append(p.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Runtime Invisible Parameter Annotation Attribute Name Index]");
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Runtime Invisible Parameter Annotation Attribute Length]");
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Runtime Invisible Parameter Annotation Attribute Parameter Number]");
-        stringBuilder.append(String.format("%02X", numberOfParameters));
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-
-        for(ParameterAnnotations c : parameterAnnotations) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
-    }
 }

@@ -1,11 +1,8 @@
 package hgu.isel.structure.attribute.type.target;
 
-import hgu.isel.structure.attribute.type.annotation.elemet.union.Annotation;
-import hgu.isel.structure.attribute.type.stack.verification.VerificationTypeInformation;
+import hgu.isel.structure.BaseBytecodeStructure;
+import hgu.isel.structure.attribute.AttributeInformation;
 import hgu.isel.structure.attribute.type.target.local.LocalVariableTargetTable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -13,7 +10,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class LocalVariableTarget implements TargetInformation{
+public class LocalVariableTarget extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] tableLength; // u2
     private LocalVariableTargetTable[] table;
 
@@ -37,37 +34,5 @@ public class LocalVariableTarget implements TargetInformation{
         this.tableLength = tableLength;
         this.table = table;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(byte b : tableLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(LocalVariableTargetTable t : table) {
-            stringBuilder.append(t.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Local Variable Target Table Length]");
-        for(byte b : tableLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(LocalVariableTargetTable c : table) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
-    }
+    
 }

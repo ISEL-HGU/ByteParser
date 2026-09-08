@@ -1,16 +1,12 @@
 package hgu.isel.structure.attribute.type;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
-import hgu.isel.structure.attribute.type.boot.BootstrapMethodInformation;
-import hgu.isel.structure.attribute.type.local.LocalVariableTypeTableInformation;
 import hgu.isel.structure.attribute.type.module.Exports;
 import hgu.isel.structure.attribute.type.module.Opens;
 import hgu.isel.structure.attribute.type.module.Provides;
 import hgu.isel.structure.attribute.type.module.Requires;
 import hgu.isel.structure.attribute.type.module.uses.UsesIndex;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -18,7 +14,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Module implements AttributeInformation {
+public class Module extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] attributeNameIndex; // u2
     private byte[] attributeLength; // u4
     private byte[] moduleNameIndex; // u2
@@ -172,171 +168,5 @@ public class Module implements AttributeInformation {
         this.providesCount = providesCount;
         this.provides = provides;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\n        - Module: ");
-
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : moduleNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : moduleFlags) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : moduleVersionIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : requiresCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(Requires r : requires) {
-            stringBuilder.append(r.toString());
-        }
-
-        for(byte b : exportsCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(Exports e : exports) {
-            stringBuilder.append(e.toString());
-        }
-
-        for(byte b : opensCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(Opens o : opens) {
-            stringBuilder.append(o.toString());
-        }
-
-        for(byte b : usesCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(UsesIndex i : usesIndex) {
-            stringBuilder.append(i.toString());
-        }
-
-        for(byte b : providesCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(Provides p : provides) {
-            stringBuilder.append(p.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Module Attribute Name Index]");
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Module Attribute Length]");
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Module Attribute Module Name Index]");
-        for(byte b : moduleNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Module Attribute Flag]");
-        for(byte b : moduleFlags) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Module Attribute Version Index]");
-        for(byte b : moduleVersionIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Module Attribute Requires Count]");
-        for(byte b : requiresCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(Requires l : requires) {
-            output.addAll(l.tokenize());
-        }
-
-        // output.add("[Module Attribute Exports Count]");
-        for(byte b : exportsCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(Exports l : exports) {
-            output.addAll(l.tokenize());
-        }
-
-
-        // output.add("[Module Attribute Opens Count]");
-        for(byte b : opensCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(Opens l : opens) {
-            output.addAll(l.tokenize());
-        }
-
-
-        // output.add("[Module Attribute Uses Count]");
-        for(byte b : usesCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(UsesIndex l : usesIndex) {
-            output.addAll(l.tokenize());
-        }
-        // output.add("[Module Attribute Provides Count]");
-        for(byte b : providesCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(Provides l : provides) {
-            output.addAll(l.tokenize());
-        }
-
-        return output;
-    }
+    
 }

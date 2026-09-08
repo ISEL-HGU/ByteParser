@@ -1,11 +1,8 @@
 package hgu.isel.structure.attribute.type;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
-import hgu.isel.structure.attribute.type.nest.Classes;
 import hgu.isel.structure.attribute.type.record.RecordComponentInformation;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -13,7 +10,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Record implements AttributeInformation {
+public class Record extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] attributeNameIndex; // u2
     private byte[] attributeLength; // u4
     private byte[] componentsCount; // u2
@@ -58,61 +55,4 @@ public class Record implements AttributeInformation {
         this.components = components;
     }
 
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\n        - Record: ");
-
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : componentsCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(RecordComponentInformation r : components) {
-            stringBuilder.append(r.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Record Attribute Name Index]");
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Record Attribute Length]");
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Record Attribute Components Count]");
-        for(byte b : componentsCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(RecordComponentInformation c : components) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
-    }
 }

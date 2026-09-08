@@ -1,10 +1,8 @@
 package hgu.isel.structure.attribute.type.stack.frame.union;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.type.stack.frame.StackMapFrame;
 import hgu.isel.structure.attribute.type.stack.verification.VerificationTypeInformation;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -12,7 +10,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class FullFrame implements StackMapFrame {
+public class FullFrame extends BaseBytecodeStructure implements StackMapFrame {
     private byte frameType; // 255
     private byte[] offsetDelta; // u2
     private byte[] numberOfLocals; // u2
@@ -76,75 +74,5 @@ public class FullFrame implements StackMapFrame {
         this.numberOfStackItems = numberOfStackItems;
         this.stack = stack;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append(String.format("%02X", frameType));
-
-        for(byte b : offsetDelta) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : numberOfLocals) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(VerificationTypeInformation v : locals) {
-            stringBuilder.append(v.toString());
-        }
-
-        for(byte b : numberOfStackItems) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(VerificationTypeInformation v : stack) {
-            stringBuilder.append(v.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        // output.add("[Full Frame]");
-        stringBuilder.append(String.format("%02X", frameType));
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-
-        // output.add("[Full Frame Offset Delta]");
-        for(byte b : offsetDelta) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Full Frame Local Number]");
-        for(byte b : numberOfLocals) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-
-        for(VerificationTypeInformation c : locals) {
-            output.addAll(c.tokenize());
-        }
-
-        // output.add("[Full Frame Stack Item Number]");
-        for(byte b : numberOfStackItems) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(VerificationTypeInformation c : stack) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
-    }
+    
 }

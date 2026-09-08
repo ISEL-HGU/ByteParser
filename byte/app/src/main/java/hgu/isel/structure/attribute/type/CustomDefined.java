@@ -1,8 +1,10 @@
 package hgu.isel.structure.attribute.type;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
 
 import java.util.List;
+
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -10,7 +12,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class CustomDefined implements AttributeInformation {
+public class CustomDefined extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] attributeNameIndex; // u2
     private byte[] attributeLength; // u4
     private byte[] attributes;
@@ -48,4 +50,5 @@ public class CustomDefined implements AttributeInformation {
         this.attributeLength = attributeLength;
         this.attributes = attributes;
     }
+    
 }

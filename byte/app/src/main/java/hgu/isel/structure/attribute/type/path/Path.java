@@ -1,9 +1,6 @@
 package hgu.isel.structure.attribute.type.path;
 
-import hgu.isel.structure.attribute.type.annotation.elemet.union.Annotation;
-
-import java.util.ArrayList;
-import java.util.List;
+import hgu.isel.structure.BaseBytecodeStructure;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -11,7 +8,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Path {
+public class Path extends BaseBytecodeStructure {
     private byte typePathKind;
     private byte typeArgumentIndex;
 
@@ -35,31 +32,5 @@ public class Path {
         this.typePathKind = typePathKind;
         this.typeArgumentIndex = typeArgumentIndex;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append(String.format("%02X", typePathKind));
-        stringBuilder.append(String.format("%02X", typeArgumentIndex));
-
-        return stringBuilder.toString();
-    }
-
-
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Path Kind]");
-        stringBuilder.append(String.format("%02X", typePathKind));
-
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Path Argument Index]");
-        stringBuilder.append(String.format("%02X", typeArgumentIndex));
-
-        output.add(stringBuilder.toString());
-
-        return output;
-    }
+    
 }

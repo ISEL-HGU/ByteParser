@@ -1,10 +1,8 @@
 package hgu.isel.structure.attribute.type;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.AttributeInformation;
 import hgu.isel.structure.attribute.type.nest.Classes;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -12,7 +10,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class PermittedSubClasses implements AttributeInformation {
+public class PermittedSubClasses extends BaseBytecodeStructure implements AttributeInformation {
     private byte[] attributeNameIndex; // u2
     private byte[] attributeLength; // u4
     private byte[] numberOfClasses; // u2
@@ -55,63 +53,5 @@ public class PermittedSubClasses implements AttributeInformation {
         this.attributeLength = attributeLength;
         this.numberOfClasses = numberOfClasses;
         this.classes = classes;
-    }
-
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append("\n        - PermittedSubClasses: ");
-
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : numberOfClasses) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(Classes c : classes) {
-            stringBuilder.append(c.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Permitted Sub Class Attribute Name Index]");
-        for(byte b : attributeNameIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Permitted Sub Class Attribute Length]");
-        for(byte b : attributeLength) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Permitted Sub Class Attribute Class Number]");
-        for(byte b : numberOfClasses) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(Classes c : classes) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
     }
 }

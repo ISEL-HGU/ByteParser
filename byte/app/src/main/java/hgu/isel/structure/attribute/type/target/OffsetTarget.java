@@ -1,10 +1,7 @@
 package hgu.isel.structure.attribute.type.target;
 
-import hgu.isel.structure.attribute.type.annotation.elemet.union.Annotation;
-import hgu.isel.structure.attribute.type.stack.verification.VerificationTypeInformation;
-
-import java.util.ArrayList;
-import java.util.List;
+import hgu.isel.structure.BaseBytecodeStructure;
+import hgu.isel.structure.attribute.AttributeInformation;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -12,7 +9,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class OffsetTarget implements TargetInformation{
+public class OffsetTarget extends BaseBytecodeStructure implements AttributeInformation{
     private byte[] offset; // u2
 
     public byte[] getOffset() {
@@ -26,29 +23,5 @@ public class OffsetTarget implements TargetInformation{
     public OffsetTarget(byte[] offset) {
         this.offset = offset;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(byte b : offset) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Offset Target]");
-        for(byte b : offset) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        return output;
-    }
+    
 }

@@ -8,16 +8,25 @@ import hgu.isel.options.CommandLineOptions;
 import hgu.isel.reader.ByteReader;
 import hgu.isel.tokenizer.ByteStructure;
 import hgu.isel.tokenizer.ByteTokenizer;
+
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 
 public class ByteTok {
     private static HashSet<String> customAttributes = new HashSet<>();
@@ -28,7 +37,6 @@ public class ByteTok {
     }
 
     public void run(String[] args) {
-
         CommandLineOptions commandLineOptions = new CommandLineOptions();
 
         try {
@@ -46,10 +54,56 @@ public class ByteTok {
             } else if(cmd.hasOption("a")) {
 
                 String[] tokenizeArgs = cmd.getOptionValues("a");
-                String inputPath = tokenizeArgs[0];
+                analyze(tokenizeArgs[0]);
 
-                analyze(inputPath);
+            } else if (cmd.hasOption("j")) {
+                String[] tokenizeArgs = cmd.getOptionValues("j");
+                String classFile = tokenizeArgs[0];
+                String outDir = tokenizeArgs[1];
+                
+                saveJson(classFile, outDir);
 
+            } else if (cmd.hasOption("m")) {
+                String[] tokenizeArgs = cmd.getOptionValues("m");
+                String classListFile = tokenizeArgs[0];
+                String outDir = tokenizeArgs[1];
+
+                try {
+                    // 1. 파일 목록 전체 읽기
+                    List<String> classFiles = Files.readAllLines(Paths.get(classListFile));
+
+                    // 2. parallelStream()을 이용해 멀티스레드 병렬 처리
+                    classFiles.parallelStream().forEach(line -> {
+                        String classFile = line.trim();
+                        if (classFile.isEmpty()) return;
+
+                        try {
+                            // 원본 파일명을 패키지 구분의 점(.) 형태나 상위 경로 형태로 변환
+                            String normalizedPath = classFile.replace("\\", "/");
+                            String relativePath = normalizedPath.contains("resources/") 
+                                    ? normalizedPath.substring(normalizedPath.lastIndexOf("resources/") + 10)
+                                    : Paths.get(classFile).getFileName().toString();
+
+                            // 패키지 경로를 살려서 파일명 생성 (예: com.example.Main.json)
+                            String jsonFileName = relativePath.replace("/", ".").replace(".class", ".json");
+
+                            File jsonFile = new File(outDir, jsonFileName);
+
+                            // 이미 존재하면 스킵
+                            if (jsonFile.exists()) {
+                                return;
+                            }
+
+                            saveJson(classFile, outDir);
+
+                        } catch (Exception e) {
+                            System.err.println("Error processing file: " + classFile + " - " + e.getMessage());
+                        }
+                    });
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else if(cmd.hasOption("r")) {
 
                 String[] removeArgs = cmd.getOptionValues("r");
@@ -170,21 +224,93 @@ public class ByteTok {
         byteTokenizer.createVocabulary(vocabPath);
     }
 
+
     private void analyze(String path) {
         ByteReader byteReader = new ByteReader(path);
-
         byte[] bytes = byteReader.readClassFile();
 
         ByteAnalyzer byteAnalyzer = new ByteAnalyzer(bytes);
         ByteStructure byteStructure = null;
         try {
             byteStructure = byteAnalyzer.analyze();
-            System.out.println(byteAnalyzer.printResult());
+            String resultText = byteStructure.toString();
+
+            // ★ 바이너리 파일 인식 방지: NULL 문자(\0) 특수문자 제거
+            if (resultText != null) {
+                resultText = resultText.replace("\0", "");
+            }
+
+            String normalizedPath = path.replace("\\", "/"); 
+            String key = "resources/";
+            int mainIndex = normalizedPath.lastIndexOf(key);
+            String relativePath;
+            if (mainIndex != -1) {
+                relativePath = normalizedPath.substring(mainIndex + key.length());
+            } else {
+                relativePath = Paths.get(path).getFileName().toString();
+            }
+            String txtFileName = relativePath
+                    .replace("/", ".")
+                    .replace(".class", ".txt");
+
+            Path outputDir = Paths.get(System.getProperty("user.dir"), "output");
+            Files.createDirectories(outputDir);
+            Path outputPath = outputDir.resolve(txtFileName);
+
+            Files.write(outputPath,
+                    resultText.getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
+
+            if (Files.exists(outputPath)) {
+                System.out.println("File saved : " + outputPath.toAbsolutePath());
+            } else {
+                System.err.println("File not saved!");
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
+
+
+    private void saveJson(String path, String outOption) {
+        ByteReader byteReader = new ByteReader(path);
+        byte[] bytes = byteReader.readClassFile();
+
+        ByteAnalyzer byteAnalyzer = new ByteAnalyzer(bytes);
+        try {
+            // 1. byteAnalyzer.analyze()를 통해 ByteStructure '객체(인스턴스)'를 얻음
+            ByteStructure byteStructure = byteAnalyzer.analyze();
+
+            String classFileName = Paths.get(path).getFileName().toString();
+            String jsonFileName = classFileName.replace(".class", ".json");
+
+            Path outputDir = Paths.get(outOption);
+            Files.createDirectories(outputDir);
+            Path outputPath = outputDir.resolve(jsonFileName);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+            
+            // 2. 클래스명(ByteStructure)이 아닌 변수명(byteStructure)으로 toJson() 호출!
+            JsonElement jsonElement = byteStructure.toJson();
+
+            Files.write(outputPath,
+                    gson.toJson(jsonElement).getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
+
+            if (Files.exists(outputPath)) {
+                System.out.println("File saved : " + outputPath.toAbsolutePath());
+            } else {
+                System.err.println("File not saved!");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private void remove(String path) {
         ByteReader byteReader = new ByteReader(path);

@@ -1,11 +1,9 @@
 package hgu.isel.structure.attribute.type.stack.frame.union;
 
-import hgu.isel.structure.attribute.type.annotation.elemet.union.Annotation;
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.type.stack.frame.StackMapFrame;
 import hgu.isel.structure.attribute.type.stack.verification.VerificationTypeInformation;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -13,7 +11,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class AppendedFrame implements StackMapFrame {
+public class AppendedFrame extends BaseBytecodeStructure implements StackMapFrame {
     private byte frameType; // 252 - 254
     private byte[] offsetDelta; // u2
     private VerificationTypeInformation[] locals; // frameType - 251
@@ -47,46 +45,5 @@ public class AppendedFrame implements StackMapFrame {
         this.offsetDelta = offsetDelta;
         this.locals = locals;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append(String.format("%02X", frameType));
-
-        for(byte b : offsetDelta) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(VerificationTypeInformation v : locals) {
-            stringBuilder.append(v.toString());
-        }
-
-
-
-        return stringBuilder.toString();
-    }
-
-    @Override
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        // output.add("[Appended Frame Type]");
-        stringBuilder.append(String.format("%02X", frameType));
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Appended Frame Offset Delta]");
-        for(byte b : offsetDelta) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-
-        for(VerificationTypeInformation c : locals) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
-    }
+    
 }

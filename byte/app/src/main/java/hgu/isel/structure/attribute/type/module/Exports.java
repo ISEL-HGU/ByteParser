@@ -1,9 +1,7 @@
 package hgu.isel.structure.attribute.type.module;
 
+import hgu.isel.structure.BaseBytecodeStructure;
 import hgu.isel.structure.attribute.type.module.export.ExportIndex;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -11,7 +9,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Exports {
+public class Exports extends BaseBytecodeStructure {
     private byte[] exportsIndex; // u2
     private byte[] exportsFlags; // u2
     private byte[] exportsToCount; // u2
@@ -55,58 +53,5 @@ public class Exports {
         this.exportsToCount = exportsToCount;
         this.exportsToIndex = exportsToIndex;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(byte b : exportsIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : exportsFlags) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : exportsToCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(ExportIndex e : exportsToIndex) {
-            stringBuilder.append(e.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Exports Index]");
-        for(byte b : exportsIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Exports Flag]");
-        for(byte b : exportsFlags) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Exports Count]");
-        for(byte b : exportsToCount) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(ExportIndex e : exportsToIndex) {
-            output.addAll(e.tokenize());
-        }
-
-        return output;
-    }
+    
 }

@@ -1,7 +1,6 @@
 package hgu.isel.structure.attribute.type.nest;
 
-import java.util.ArrayList;
-import java.util.List;
+import hgu.isel.structure.BaseBytecodeStructure;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -9,7 +8,7 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class Classes {
+public class Classes extends BaseBytecodeStructure {
     private byte[] bytes; // u2
 
     public byte[] getBytes() {
@@ -23,29 +22,5 @@ public class Classes {
     public Classes(byte[] bytes) {
         this.bytes = bytes;
     }
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for(byte b : bytes) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        return stringBuilder.toString();
-    }
-
-
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // output.add("[Class Byte]");
-        for(byte b : bytes) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        return output;
-    }
+    
 }

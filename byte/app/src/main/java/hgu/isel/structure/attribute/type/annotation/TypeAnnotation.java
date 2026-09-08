@@ -1,11 +1,8 @@
 package hgu.isel.structure.attribute.type.annotation;
 
-import hgu.isel.structure.attribute.type.annotation.elemet.union.Annotation;
 import hgu.isel.structure.attribute.type.path.TypePath;
-import hgu.isel.structure.attribute.type.target.TargetInformation;
-
-import java.util.ArrayList;
-import java.util.List;
+import hgu.isel.structure.BaseBytecodeStructure;
+import hgu.isel.structure.attribute.AttributeInformation;
 
 /**
  * This class supports the structure of the JVM bytecodes.
@@ -13,9 +10,9 @@ import java.util.List;
  * <p>
  * All getters and setters in this class are simple property accessors with no side effects.
  */
-public class TypeAnnotation {
+public class TypeAnnotation extends BaseBytecodeStructure {
     private byte targetType;
-    private TargetInformation targetInformation;
+    private AttributeInformation targetInformation;
     private TypePath targetPath;
     private byte[] typeIndex; // u2
     private byte[] numberOfElementValuePairs; // u2
@@ -29,11 +26,11 @@ public class TypeAnnotation {
         this.targetType = targetType;
     }
 
-    public TargetInformation getTargetInformation() {
+    public AttributeInformation getTargetInformation() {
         return targetInformation;
     }
 
-    public void setTargetInformation(TargetInformation targetInformation) {
+    public void setTargetInformation(AttributeInformation targetInformation) {
         this.targetInformation = targetInformation;
     }
 
@@ -69,68 +66,12 @@ public class TypeAnnotation {
         this.elementValuePairs = elementValuePairs;
     }
 
-    public TypeAnnotation(byte targetType, TargetInformation targetInformation, TypePath targetPath, byte[] typeIndex, byte[] numberOfElementValuePairs, ElementValuePairs[] elementValuePairs) {
+    public TypeAnnotation(byte targetType, AttributeInformation targetInformation, TypePath targetPath, byte[] typeIndex, byte[] numberOfElementValuePairs, ElementValuePairs[] elementValuePairs) {
         this.targetType = targetType;
         this.targetInformation = targetInformation;
         this.targetPath = targetPath;
         this.typeIndex = typeIndex;
         this.numberOfElementValuePairs = numberOfElementValuePairs;
         this.elementValuePairs = elementValuePairs;
-    }
-
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append(String.format("%02X", targetType));
-        stringBuilder.append(targetInformation.toString());
-        stringBuilder.append(targetPath.toString());
-
-        for(byte b : typeIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(byte b : numberOfElementValuePairs) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-
-        for(ElementValuePairs e : elementValuePairs) {
-            stringBuilder.append(e.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-
-    public List<String> tokenize() {
-        List<String> output = new ArrayList<>();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        // output.add("[Type Annotation Type]");
-        stringBuilder.append(String.format("%02X", targetType));
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        output.addAll(targetInformation.tokenize());
-        output.addAll(targetPath.tokenize());
-
-        // output.add("[Type Annotation Type Index]");
-        for(byte b : typeIndex) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        // output.add("[Type Annotation Element Number]");
-        for(byte b : numberOfElementValuePairs) {
-            stringBuilder.append(String.format("%02X", b));
-        }
-        output.add(stringBuilder.toString());
-        stringBuilder.setLength(0);
-
-        for(ElementValuePairs c : elementValuePairs) {
-            output.addAll(c.tokenize());
-        }
-
-        return output;
     }
 }
